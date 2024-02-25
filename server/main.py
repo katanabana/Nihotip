@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 import uvicorn
-from utils import get_words, TAGS_TO_COLORS
+from server.tokens import get_words, TAGS_TO_COLORS
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -21,11 +21,9 @@ app.add_middleware(
 
 
 @app.get("/tokenize")
-def tokenize(request: Request):
-    label_to_tokens = {}
-    for label, sentence_or_line in request.query_params.items():
-        label_to_tokens[label] = get_words(sentence_or_line)
-    return label_to_tokens
+def tokenize(text: str):
+    return get_words(text)
+
 
 @app.get("/tags_to_colors")
 def tags_to_colors():

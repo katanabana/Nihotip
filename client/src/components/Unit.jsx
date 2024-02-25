@@ -96,93 +96,33 @@ function BigUnit({ token, showColor }) {
 }
 
 export default function Units({ text, showColor }) {
-  // Tokenizing api doesn't reflect where spaces and lines breaks are in text.
-  // There for this information should be memorized before tokenizing text.
-  // Text elements gotten after applying split are considered independent and processed by api as completely separate strings.
-
-  const textItems = {};
-  const lines = text.split("\n");
-  let index = 0;
-  for (let i = 0; i < lines.length; i++) {
-    lines[i] = lines[i].split(" ");
-    for (let j = 0; j < lines[i].length; j++) {
-      lines[i][j] = lines[i][j].split("　");
-      for (const itemText of lines[i][j]) {
-        textItems[index] = itemText;
-        index++;
-      }
-    }
-  }
-
-  const linesDivs = [];
-  const linesTexts = text.split("\n");
-  for (let i = 0; i < linesTexts.length; i++) {
-    linesDivs.push(<div key={i}>{linesTexts[i]}</div>);
-  }
   const [units, setUnits] = useState(linesDivs);
   // send request to api to get text tokens:
   useEffect(() => {
-    const params = new URLSearchParams(textItems);
-    const url = process.env.REACT_APP_API_URL + "/tokenize?" + params;
+    const url = process.env.REACT_APP_API_URL + "/tokenize?text=" + text;
     fetch(url, { mode: "cors" })
       .then((respnose) => respnose.json())
-      .then((keysToTokens) => {
-        // create collections of html elements representing parts of text:
+      .then((tokens) => {
         const newUnits = [];
-        index = 0;
-        for (let i = 0; i < lines.length; i++) {
-          for (let j = 0; j < lines[i].length; j++) {
-            for (let h = 0; h < lines[i][j].length; h++) {
-              const tokens = keysToTokens[index.toString()];
-              for (
-                let token_index = 0;
-                token_index < tokens.length;
-                token_index++
-              ) {
-                const tokenMap = new Map(Object.entries(tokens[token_index]));
-                const token = {};
-                for (const [key, value] of tokenMap) {
-                  token[key] = value;
-                }
-                if (Object.keys(token).length > 1) {
-                  newUnits.push(
-                    <BigUnit
-                      key={`big-unit-${index}-${token_index}`}
-                      token={token}
-                      showColor={showColor}
-                    ></BigUnit>
-                  );
-                } else {
-                  newUnits.push(
-                    <span key={`big-unit-${index}-${token_index}`}>
-                      {token.text}
-                    </span>
-                  );
-                }
-              }
-              index++;
-              if (h != lines[i][j].length - 1)
-                newUnits.push(
-                  <span
-                    key={`japanese-space-${i}-${j}-${h}`}
-                    style={{ whiteSpace: "pre" }}
-                  >
-                    {"　"}
-                  </span>
-                );
-            }
-            if (j != lines[i].length - 1)
-              newUnits.push(
-                <span
-                  key={`plain-space-${i}-${j}`}
-                  style={{ whiteSpace: "pre" }}
-                >
-                  {" "}
-                </span>
-              );
+        for (let token_index = 0; token_index < tokens.length; token_index++) {
+          const tokenMap = new Map(Object.entries(tokens[token_index]));
+          const token = {};
+          for (const [key, value] of tokenMap) {
+            token[key] = value;
           }
-          if (i != lines.length - 1)
-            newUnits.push(<br key={`line-break-${i}`}></br>);
+          if (Object.keys(token).length > 1) {
+            newUnits.push(
+              <BigUnit
+                key={`big-unit-${index}-${token_index}`}
+                token={token}
+                showColor={showColor}
+              ></BigUnit>
+            );
+          } else {
+            newUnits.push(
+              <span key={`big-unit-${index}-${token_index}`}>{token.text}</span>
+            );
+          }
         }
         setUnits(newUnits);
       });
