@@ -85,3 +85,28 @@ PUNCTUATION = {
 
 
 {'文語': ('literary', 'word that is no longer used in everyday speech, but is still used in a number of contexts, such as in formal writing, in poetry, and in traditional Japanese arts, classical Japanese (文語, bungo) texts, such as literature from the Heian period (794-1185).')}
+
+# COLORS:
+
+
+def to_hex(rgb):
+    return "#{0:02x}{1:02x}{2:02x}".format(*rgb)
+
+
+def to_rgb(floats):
+    return tuple(map(lambda x: int(x * 255), floats))
+
+
+def lighten(rgb):
+    return tuple(map(lambda x: min(x + 100, 255), rgb))
+
+
+def get_colors(n):
+    float_colors = distinctipy.get_colors(n)
+    rgb_colors = list(map(to_rgb, float_colors))
+    lightened_colors = list(map(lighten, rgb_colors))
+    hex_colors = list(map(to_hex, lightened_colors))
+    return hex_colors
+
+
+{'記号': 'symbol',}

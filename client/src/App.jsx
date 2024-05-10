@@ -1,77 +1,132 @@
 import { useState, useEffect } from "react";
-import Units from "./components/Unit.jsx";
+import process from "process";
+import { Unit } from "./components/Unit.jsx";
+import Menu from "./components/Menu.jsx";
+import { addText, History, getHistory } from "./components/History.jsx";
+import editIcon from "./assets/icons/edit.png";
+import displayIcon from "./assets/icons/display.png";
+import loaderIcon from "./assets/icons/loader.png";
+
+async function getTokens(text) {
+  let url = process.env.REACT_APP_API_URL;
+  url += "/tokens?text=";
+  url += text.replaceAll("\n", "%0A");
+  const respnose = await fetch(url, { mode: "cors" });
+  return await respnose.json();
+}
 
 function App() {
-  // displaying parameters:
-  const [showColor, setShowColor] = useState(true);
-
-  // main element is element for displaying/editing text (presumably japanese)
-  // user can see tooltips when they move cursor on the text inside a display element
-  // inside an input element user can edit text for which they want to get tooltips for
-
-  const [showDisplay, setShowDisplay] = useState(true);
   const [text, setText] = useState("");
-  // when showDisplay is true the returned element is a display element
-  // when showDisplay is false the returned element is an input element
+  const [tokens, setTokens] = useState([]);
+  const [beingEdited, setBeingEdited] = useState(true);
+  const [color, setColor] = useState("part of speech");
+  const [currentText, setCurrentText] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState(getHistory());
+
+  const maxText = 2000;
 
   useEffect(() => {
-    // move caret to the input element after its creation and select the entire text in the input element
-    // selecting the entire text allows user to quickly delete it or replace it with another text right after clicking on the display
-    const input = document.getElementById("input");
-    if (input) {
-      const range = document.createRange();
-      range.selectNodeContents(input);
-      var selection = window.getSelection();
-      selection.removeAllRanges();
-      selection.addRange(range);
+    if (beingEdited) return;
+    setLoading(true);
+    getTokens(text).then((tokens) => {
+      setTokens(tokens);
+      setLoading(false);
+      addText(text);
+      setHistory(getHistory());
+    });
+  }, [text]);
+
+  const textComponent = beingEdited ? (
+    <div
+      className="input"
+      contentEditable="plaintext-only"
+      suppressContentEditableWarning={true}
+      onInput={(event) => setCurrentText(event.target.innerText)}
+      /* onInput shouldn't invoke setText(event.target.innerText) because text is content of event.target*/
+    >
+      {text}
+    </div>
+  ) : (
+    <div className="display">
+      {Array.from(tokens.entries(), ([i, token]) => (
+        <Unit key={i} token={token} color={color}></Unit>
+      ))}
+    </div>
+  );
+
+  function changeMode() {
+    if (beingEdited && currentText !== text) {
+      setText(currentText);
+      setTokens([currentText]);
     }
-  }, []);
-
-  let mainElement;
-
-  if (showDisplay)
-    mainElement = (
-      <div
-        id="display"
-        onClick={() => {
-          // the display element is replaced by an input element when user clicks on the display element
-          setShowDisplay(false);
-        }}
-      >
-        <Units text={text} showColor={showColor}></Units>
-      </div>
-    );
-  else {
-    mainElement = (
-      <div
-        id="input"
-        contentEditable="plaintext-only"
-        onBlur={(event) => {
-          // the input element is replaced by a display element when user clicks outside of the input element
-          setText(event.target.innerText);
-          setShowDisplay(true);
-        }}
-      >
-        {text}
-      </div>
-    );
+    if (!beingEdited) setLoading(false);
+    setBeingEdited(!beingEdited);
+    setText(currentText);
   }
+
+  const mode = (
+    <div
+      className={
+        "tooltip-container mode hiddable" +
+        (0 < currentText.length && currentText.length <= maxText
+          ? ""
+          : " hidden")
+      }
+    >
+      <img
+        className="button"
+        src={beingEdited ? displayIcon : editIcon}
+        onClick={changeMode}
+      ></img>
+      <div className="tooltip background">
+        {"switch to " + (beingEdited ? "tip" : "edit") + " mode"}
+      </div>
+    </div>
+  );
+
+  const wordCount = (
+    <div
+      className={
+        "word-count hiddable" +
+        (currentText.length >= 0.75 * maxText && beingEdited ? "" : " hidden") +
+        (currentText.length > maxText ? " overflow" : "")
+      }
+    >
+      {`${currentText.length} / ${maxText}`}
+    </div>
+  );
 
   return (
     <>
-      <div id="menu">
-        <div className="checkbox-wrapper-2">
-          <input
-            type="checkbox"
-            className="sc-gJwTLC ikxBAC"
-            name="color"
-            checked={showColor}
-            onChange={() => setShowColor(!showColor)}
-          ></input>
-        <label htmlFor="color">Color</label>
+      <Menu
+        color={color}
+        setColor={setColor}
+        loading={loading}
+        beingEdited={beingEdited}
+      ></Menu>
+      {wordCount}
+      <div className="main">
+        <div className="text-container">
+          <div className={"background" + (loading ? " blur" : "")}>
+            {textComponent}
+            <img
+              className={"loader hiddable" + (loading ? "" : " hidden")}
+              src={loaderIcon}
+            ></img>
+          </div>
         </div>
+        {mode}
       </div>
-      <div id="main">{mainElement}</div>
+      <History
+        setText={(text) => {
+          document.getElementsByClassName("input")[0].innerHTML = text;
+          setCurrentText(text);
+        }}
+        hidden={currentText || history.length === 0}
+        history={history}
+        setHistory={setHistory}
+      ></History>
     </>
   );
 }

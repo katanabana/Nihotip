@@ -1,131 +1,88 @@
-import { useEffect, useState } from "react";
-import process from "process";
-//import {isDigraph, specialKana, basicCharacter} from "./dictionary.jsx"
+import { useState } from "react";
 
-const url = process.env.REACT_APP_API_URL + "\\tags_to_colors";
-const tagsToColors = await fetch(url).then((response) => response.json());
-
-function Components({ elements, func = (x) => x }) {
-  const components = [];
-  let key = 0;
-  for (const element of elements) {
-    components.push(<span key={key}>{func(element)}</span>);
-    key++;
+async function importAssociations() {
+  /* require.context() and import() throw errors if the directory is passed through a variable */
+  const associations = {};
+  const filenames = require
+    .context("../assets/associations", true, /\.png/)
+    .keys();
+  for (const filename of filenames) {
+    const character = filename.split(".")[1].slice(1);
+    associations[character] = (
+      await import(`../assets/associations/${filename.slice(2)}`)
+    ).default;
   }
-  return <div>{components}</div>;
+  return associations;
 }
+const associations = await importAssociations();
 
-function Unit({ text, tooltipItems, showColor, tag }) {
-  const tooltip = [];
-  for (let i = 0; i < tooltipItems.length; i++) {
-    tooltip.push(<div key={i}>{tooltipItems[i]}</div>);
+function UnitText({ token, color }) {
+  if (!token[color] && token.subtokens) {
+    const text = [];
+    /* perform recursion on the subtokens in hopes of the feature presenting in them */
+    for (const subtoken of token.subtokens)
+      text.push(
+        <UnitText token={subtoken} color={color} key={text.length}></UnitText>
+      );
+    return <span className="unit-text">{text}</span>;
   }
-  const style = {};
-  if (tag)
-    tooltip.push(
-      <div style={style} key={tooltipItems.length}>
-        {tag}
-      </div>
-    );
-  if (tagsToColors[tag] && showColor) {
-    style.color = tagsToColors[tag];
-  } else {
-    style.color = "#d1d0c5";
-  }
+  /* feature that should be marked with color is present in the token or the token can't be subdivided further */
   return (
-    <span className="unit">
-      <span className="unit-text" style={style}>
-        {text}
-      </span>
-      {tooltip.length > 0 && <span className="tooltip">{tooltip}</span>}
+    <span className={"unit-text" + (token[color] ? " " + token[color] : "")}>
+      {token.text}
     </span>
   );
 }
 
-function SmallUnit({ text, showColor, tag }) {
-  return (
-    <Unit text={text} tooltipItems={[]} showColor={showColor} tag={tag}></Unit>
-  );
-}
+function Unit({ token, color }) {
+  color;
+  const [showTooltip, setShowTooltip] = useState(false);
 
-function MediumUnit({ subtoken, showColor }) {
-  const hiragana = (
-    <Components
-      elements={subtoken.hiragana}
-      func={(character) => (
-        <SmallUnit
-          text={character}
-          showColor={showColor}
-          tag={"hiragana"}
-        ></SmallUnit>
+  if (typeof token === "string") return <span>{token}</span>;
+
+  const tooltip = [];
+
+  if (["katakana", "hiragana"].includes(token["writing system"]))
+    tooltip.push(<img key="img" src={associations[token.text]}></img>);
+
+  for (let [label, feature] of Object.entries(token)) {
+    if (label === "text") continue;
+    if (label === "initial") {
+      tooltip.push(
+        <div key={label}>
+          <Unit token={feature}></Unit>→{token.text}
+        </div>
+      );
+      continue;
+    } else if (Array.isArray(feature)) {
+      // feature is an array of tokens
+      const entries = Object.entries(feature);
+      feature = [];
+      for (const [i, subtoken] of entries) {
+        feature.push(<Unit key={i} token={subtoken}></Unit>);
+        if (label != "reading")
+          feature.push(<span key={i + entries.length}>+</span>);
+      }
+      if (label != "reading") feature.pop();
+    } else if (typeof feature != "string") {
+      // feature is a token
+      feature = <Unit token={feature}></Unit>;
+    }
+    tooltip.push(<div key={label}>{feature}</div>);
+  }
+  return (
+    <span
+      className={
+        "unit tooltip-container" + (showTooltip ? " show-tooltip" : "")
+      }
+      onClick={() => setShowTooltip(!showTooltip)}
+    >
+      <UnitText token={token} color={color} start={0}></UnitText>
+
+      {tooltip.length > 0 && (
+        <span className="tooltip background">{tooltip}</span>
       )}
-    ></Components>
-  );
-  return (
-    <Unit
-      text={subtoken.text}
-      tooltipItems={[hiragana]}
-      showColor={showColor}
-      tag={subtoken.tag}
-    ></Unit>
+    </span>
   );
 }
-
-function BigUnit({ token, showColor }) {
-  const subtokens = Object.values(token.subtokens);
-  const sum = (
-    <Components
-      elements={subtokens}
-      func={(subtoken) => (
-        <span>
-          <MediumUnit subtoken={subtoken} showColor={showColor}></MediumUnit>
-          {subtoken != subtokens[subtokens.length - 1] && <span>+</span>}
-        </span>
-      )}
-    ></Components>
-  );
-
-  return (
-    <Unit
-      text={token["text"]}
-      showColor={showColor}
-      tooltipItems={[sum]}
-      tag={token["tag"]}
-    ></Unit>
-  );
-}
-
-export default function Units({ text, showColor }) {
-  const [units, setUnits] = useState(linesDivs);
-  // send request to api to get text tokens:
-  useEffect(() => {
-    const url = process.env.REACT_APP_API_URL + "/tokenize?text=" + text;
-    fetch(url, { mode: "cors" })
-      .then((respnose) => respnose.json())
-      .then((tokens) => {
-        const newUnits = [];
-        for (let token_index = 0; token_index < tokens.length; token_index++) {
-          const tokenMap = new Map(Object.entries(tokens[token_index]));
-          const token = {};
-          for (const [key, value] of tokenMap) {
-            token[key] = value;
-          }
-          if (Object.keys(token).length > 1) {
-            newUnits.push(
-              <BigUnit
-                key={`big-unit-${index}-${token_index}`}
-                token={token}
-                showColor={showColor}
-              ></BigUnit>
-            );
-          } else {
-            newUnits.push(
-              <span key={`big-unit-${index}-${token_index}`}>{token.text}</span>
-            );
-          }
-        }
-        setUnits(newUnits);
-      });
-  }, [text, showColor]);
-  return units;
-}
+export { Unit };
