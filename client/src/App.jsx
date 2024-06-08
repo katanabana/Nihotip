@@ -6,6 +6,7 @@ import { addText, History, getHistory } from "./components/History.jsx";
 import editIcon from "./assets/icons/edit.png";
 import displayIcon from "./assets/icons/display.png";
 import loaderIcon from "./assets/icons/loader.png";
+import settingsIcon from "./assets/icons/settings.png";
 
 async function getTokens(text) {
   let url = process.env.REACT_APP_API_URL;
@@ -23,6 +24,7 @@ function App() {
   const [currentText, setCurrentText] = useState(false);
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState(getHistory());
+  const [hidden, setHidden] = useState(true);
 
   const maxText = 2000;
 
@@ -104,19 +106,28 @@ function App() {
         setColor={setColor}
         loading={loading}
         beingEdited={beingEdited}
+        hidden={hidden}
       ></Menu>
-      {wordCount}
-      <div className="main">
-        <div className="text-container">
-          <div className={"background" + (loading ? " blur" : "")}>
-            {textComponent}
-            <img
-              className={"loader hiddable" + (loading ? "" : " hidden")}
-              src={loaderIcon}
-            ></img>
-          </div>
+      <div className="text-container">
+        {wordCount}
+        <div className={"background text" + (loading ? " blur" : "")}>
+          {textComponent}
+          <img
+            className={"loader hiddable" + (loading ? "" : " hidden")}
+            src={loaderIcon}
+          ></img>
         </div>
-        {mode}
+        <nav>
+          <img
+            className={
+              "settings button hiddable" +
+              (beingEdited || loading ? " hidden" : "")
+            }
+            onClick={() => setHidden(!hidden)}
+            src={settingsIcon}
+          ></img>
+          {mode}
+        </nav>
       </div>
       <History
         setText={(text) => {

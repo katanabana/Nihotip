@@ -1,42 +1,33 @@
-import { useState } from "react";
-import settingsIcon from "../assets/icons/settings.png";
-
-export default function Menu({ color, setColor, beingEdited, loading }) {
-  const [hidden, setHidden] = useState(true);
+export default function Menu({ color, setColor, beingEdited, loading, hidden }) {
+  const options = ["none", "part of speech", "writing system"];
   const colorSelector = (
-    <label>
-      {"color"}
-      <select
-        name="color"
-        defaultValue={color}
-        onChange={(event) => setColor(event.target.value)}
-      >
-        {["none", "part of speech", "writing system"].map((option) => (
-          <option key={option} value={option} className="select-item">
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
+    <div className="color">
+      <div className="title">color</div>
+      {options.map((option) => (
+        <label key={option} className="label">
+          <input
+            type="radio"
+            name="color"
+            className="radio-input"
+            value={option}
+            checked={color === option}
+            onChange={(event) => setColor(event.target.value)}
+          />
+          <div className="radio-design"></div>
+          <div className="label-text">{option}</div>
+        </label>
+      ))}
+    </div>
   );
 
   return (
-    <>
-      <nav className={"hiddable" + (beingEdited || loading ? " hidden" : "")}>
-        <img
-          className={"button"}
-          onClick={() => setHidden(!hidden)}
-          src={settingsIcon}
-        ></img>
-        <div
-          className={
-            "background menu hiddable" +
-            (hidden || beingEdited || loading ? " hidden" : "")
-          }
-        >
-          {colorSelector}
-        </div>
-      </nav>
-    </>
+    <div
+      className={
+        "background menu hiddable" +
+        (hidden || beingEdited || loading ? " hidden" : "")
+      }
+    >
+      {colorSelector}
+    </div>
   );
 }
