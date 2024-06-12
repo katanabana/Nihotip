@@ -67,7 +67,6 @@ nav {
 }
 
 .text {
-  flex-grow: 1;
   min-width: 21em;
 }
 
@@ -120,9 +119,7 @@ nav:has(.settings.hidden ~ .mode.hidden) {
   margin-bottom: -3em;
 }
 
-.hidden {
-  opacity: 0;
-}
+
 .settings.hidden {
   margin-left: -50%;
   width: 0;
@@ -133,7 +130,7 @@ nav:has(.settings.hidden ~ .mode.hidden) {
   /* portrait */
 
   .history {
-    max-height: 25em;
+    max-height: calc(100vh - 11em);
   }
 
   #root {
@@ -157,12 +154,11 @@ nav:has(.settings.hidden ~ .mode.hidden) {
   }
 
   .text {
-    max-height: 24em;
-    flex-grow: 1;
+    max-height: calc(100vh - 19em);
   }
 
   .menu.hidden ~ .text-container .text {
-    max-height: 38em;
+    max-height: calc(100vh - 5em);
   }
 
   .menu.hidden {
@@ -185,7 +181,8 @@ nav:has(.settings.hidden ~ .mode.hidden) {
   }
 
   .history {
-    max-height: 100%;
+    height: 100%;
+    justify-content: center;
   }
 
   .history-container.hidden {
@@ -206,7 +203,6 @@ nav:has(.settings.hidden ~ .mode.hidden) {
 
   .text {
     max-height: calc(100vh - 5em);
-    flex-grow: 1;
   }
 
   .text,
@@ -288,9 +284,16 @@ nav:has(.settings.hidden ~ .mode.hidden) {
   display: flex;
   padding: 2em 4em;
   position: relative;
-  flex-grow: 1;
-  flex-shrink: 1;
   transition: 0.5s;
+}
+.history-item {
+  max-height: 100%;
+  overflow: hidden;
+}
+.history-item.hidden {
+  max-height: 0;
+  padding: 0;
+  margin: 0;
 }
 
 .mode {
@@ -547,12 +550,12 @@ nav:has(.settings.hidden ~ .mode.hidden) {
 .history {
   display: flex;
   overflow: scroll;
-  gap: 1em;
 }
 
 .history-item {
   display: flex;
   flex-direction: column;
+  margin-bottom: 1em;
 }
 
 .history-container {
@@ -582,7 +585,8 @@ nav:has(.settings.hidden ~ .mode.hidden) {
   overflow: hidden;
   flex: 1;
   white-space: pre-wrap;
-  height: 4.5em;
+  max-height: 4.5em;
+  min-height: 2em;
 }
 
 .history-item * {

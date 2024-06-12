@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import process from "process";
 import { Unit } from "./components/Unit.jsx";
 import Menu from "./components/Menu.jsx";
-import { addText, History, getHistory } from "./components/History.jsx";
+import { addText, History } from "./components/History.jsx";
 import editIcon from "./assets/icons/edit.png";
 import displayIcon from "./assets/icons/display.png";
 import loaderIcon from "./assets/icons/loader.png";
@@ -23,7 +23,6 @@ function App() {
   const [color, setColor] = useState("part of speech");
   const [currentText, setCurrentText] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [history, setHistory] = useState(getHistory());
   const [hidden, setHidden] = useState(true);
 
   const maxText = 2000;
@@ -35,7 +34,6 @@ function App() {
       setTokens(tokens);
       setLoading(false);
       addText(text);
-      setHistory(getHistory());
     });
   }, [text]);
 
@@ -135,8 +133,6 @@ function App() {
           setCurrentText(text);
         }}
         hidden={currentText || history.length === 0}
-        history={history}
-        setHistory={setHistory}
       ></History>
     </>
   );

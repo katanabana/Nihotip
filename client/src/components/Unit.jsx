@@ -68,7 +68,11 @@ function Unit({ token, color }) {
       // feature is a token
       feature = <Unit token={feature}></Unit>;
     }
-    tooltip.push(<div key={label} className={feature}>{feature}</div>);
+    tooltip.push(
+      <div key={label} className={feature}>
+        {feature}
+      </div>
+    );
   }
   return (
     <span

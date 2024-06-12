@@ -1,8 +1,7 @@
-from collections import defaultdict
 import json
 import os
 
-from wanakana import is_hiragana, is_katakana, is_kanji, is_mixed, to_hiragana
+from wanakana import to_hiragana
 from sudachipy import Dictionary
 from g4f.client import Client
 
