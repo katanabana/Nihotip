@@ -109,7 +109,6 @@ function History({ setText, hidden }) {
         ></HistoryItem>
       );
       if (!removed) {
-        console.log(currentData, data, index)
         index += 1;
       }
       key += 1;

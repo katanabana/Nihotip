@@ -44,8 +44,8 @@ def get_characters(string):
     characters = []
     for i, symbol in enumerate(string):
         character = get_character(symbol, string[i - 1] if i else None)
-        for transform, modified_kana, initial_kana in KANA_MAPPING:
-            index = modified_kana.find(transform(symbol))
+        for modified_kana, initial_kana in KANA_MAPPING:
+            index = modified_kana.find(symbol)
             if index != -1:
                 character['initial'] = get_character(initial_kana[index])
                 break

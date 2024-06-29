@@ -49,9 +49,9 @@ function App() {
     </div>
   ) : (
     <div className="display">
-      {Array.from(tokens.entries(), ([i, token]) => (
-        <Unit key={i} token={token} color={color}></Unit>
-      ))}
+      {Array.from(tokens.entries(), ([i, token]) => {
+        return <Unit key={i} token={token} color={color} zIndex={1000}></Unit>;
+      })}
     </div>
   );
 
@@ -68,7 +68,7 @@ function App() {
   const mode = (
     <div
       className={
-        "tooltip-container mode hiddable" +
+        "mode hiddable" +
         (0 < currentText.length && currentText.length <= maxText
           ? ""
           : " hidden")
@@ -79,9 +79,6 @@ function App() {
         src={beingEdited ? displayIcon : editIcon}
         onClick={changeMode}
       ></img>
-      <div className="tooltip background">
-        {"switch to " + (beingEdited ? "tip" : "edit") + " mode"}
-      </div>
     </div>
   );
 
@@ -99,6 +96,7 @@ function App() {
 
   return (
     <>
+      <div id="tooltips"></div>
       <Menu
         color={color}
         setColor={setColor}

@@ -1,7 +1,7 @@
 import json
 import os
 
-from wanakana import to_hiragana
+from wanakana import to_katakana
 from sudachipy import Dictionary
 from g4f.client import Client
 
@@ -57,10 +57,11 @@ WORD_PROPERTIES = {
 }
 
 KANA_MAPPING = [
-    (lambda kana: kana, 'ぁぃぅぇぉっゃゅょゎァィゥェォヵㇰヶㇱㇲッㇳㇴㇵㇶㇷㇷ゚ㇸㇹㇺャュョㇻㇼㇽㇾㇿヮ',
+    ('ぁぃぅぇぉっゃゅょゎァィゥェォヵㇰヶㇱㇲッㇳㇴㇵㇶㇷㇷ゚ㇸㇹㇺャュョㇻㇼㇽㇾㇿヮ',
      'あいうえおつやゆよわアイウエオカクケシスツトヌハヒフプヘホムヤユヨラリルレロワ'),
-    (to_hiragana, 'がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ', 'かきくけこさしすせそたちつてとはひふへほはひふへほ')
+    ('がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ', 'かきくけこさしすせそたちつてとはひふへほはひふへほ')
 ]
+KANA_MAPPING.append(tuple(map(to_katakana, KANA_MAPPING[-1])))
 
 
 # LOAD DICTIONARIES:

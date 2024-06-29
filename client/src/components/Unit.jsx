@@ -1,7 +1,7 @@
-import { useState } from "react";
+import Tooltip from "./Tooltip.jsx";
+import { forwardRef, useRef } from "react";
 
 async function importAssociations() {
-  /* require.context() and import() throw errors if the directory is passed through a variable */
   const associations = {};
   const filenames = require
     .context("../assets/associations", true, /\.png/)
@@ -14,79 +14,103 @@ async function importAssociations() {
   }
   return associations;
 }
+
 const associations = await importAssociations();
 
-function UnitText({ token, color }) {
-  if (!token[color] && token.subtokens) {
-    const text = [];
-    /* perform recursion on the subtokens in hopes of the feature presenting in them */
-    for (const subtoken of token.subtokens)
-      text.push(
-        <UnitText token={subtoken} color={color} key={text.length}></UnitText>
+const UnitText = forwardRef(
+  ({ onClick, onMouseLeave, onMouseEnter, token, color }, ref) => {
+    if (!token[color] && token.subtokens) {
+      const text = [];
+      for (const subtoken of token.subtokens)
+        text.push(
+          <UnitText token={subtoken} color={color} key={text.length} />
+        );
+      return (
+        <span
+          className="unit-text"
+          onMouseEnter={onMouseEnter}
+          ref={ref}
+          onMouseLeave={onMouseLeave}
+          onClick={onClick}
+        >
+          {text}
+        </span>
       );
-    return <span className="unit-text">{text}</span>;
+    }
+    return (
+      <span
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        onClick={onClick}
+        ref={ref}
+        className={"unit-text" + (token[color] ? " " + token[color] : "")}
+      >
+        {token.text}
+      </span>
+    );
   }
-  /* feature that should be marked with color is present in the token or the token can't be subdivided further */
-  return (
-    <span className={"unit-text" + (token[color] ? " " + token[color] : "")}>
-      {token.text}
-    </span>
-  );
-}
+);
 
-function Unit({ token, color }) {
-  color;
-  const [showTooltip, setShowTooltip] = useState(false);
+UnitText.displayName = "UnitText"; // Set display name explicitly
+
+function Unit({ token, color, zIndex }) {
+  const unitTextRef = useRef(null);
 
   if (typeof token === "string") return <span>{token}</span>;
 
   const tooltip = [];
 
-  if (["katakana", "hiragana"].includes(token["writing system"]))
-    tooltip.push(<img key="img" src={associations[token.text]}></img>);
+  if (
+    ["katakana", "hiragana"].includes(token["writing system"]) &&
+    !token.initial
+  )
+    tooltip.push(
+      <img key="img" src={associations[token.text]} alt={token.text} />
+    );
 
   for (let [label, feature] of Object.entries(token)) {
     if (label === "text") continue;
     if (label === "initial") {
       tooltip.push(
         <div key={label}>
-          <Unit token={feature}></Unit>→{token.text}
+          <Unit token={feature} zIndex={zIndex + 1} />→{token.text}
         </div>
       );
       continue;
     } else if (Array.isArray(feature)) {
-      // feature is an array of tokens
       const entries = Object.entries(feature);
       feature = [];
       for (const [i, subtoken] of entries) {
-        feature.push(<Unit key={i} token={subtoken}></Unit>);
-        if (label != "reading")
+        feature.push(<Unit key={i} token={subtoken} zIndex={zIndex + 1} />);
+        if (label !== "reading")
           feature.push(<span key={i + entries.length}>+</span>);
       }
-      if (label != "reading") feature.pop();
-    } else if (typeof feature != "string") {
-      // feature is a token
-      feature = <Unit token={feature}></Unit>;
+      if (label !== "reading") feature.pop();
+    } else if (typeof feature !== "string") {
+      feature = <Unit token={feature} zIndex={zIndex + 1} />;
     }
     tooltip.push(
-      <div key={label} className={feature}>
+      <div key={label} className={label + " " + feature}>
         {feature}
       </div>
     );
   }
-  return (
-    <span
-      className={
-        "unit tooltip-container" + (showTooltip ? " show-tooltip" : "")
-      }
-      onClick={() => setShowTooltip(!showTooltip)}
-    >
-      <UnitText token={token} color={color} start={0}></UnitText>
 
-      {tooltip.length > 0 && (
-        <span className="tooltip background">{tooltip}</span>
+  const unitText = <UnitText token={token} color={color} ref={unitTextRef} />;
+
+  return (
+    <>
+      {tooltip.length > 0 ? (
+        <Tooltip
+          targetRef={unitTextRef}
+          target={unitText}
+          content={tooltip}
+          zIndex={zIndex}
+        ></Tooltip>
+      ) : (
+        <></>
       )}
-    </span>
+    </>
   );
 }
 export { Unit };
