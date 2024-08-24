@@ -1,30 +1,53 @@
-from fastapi import FastAPI, Request
-import uvicorn
+from fastapi import FastAPI
+import uvicorn  # server
 from tokens import tokenize
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+import os  # for environment variables
 
 
+load_dotenv()
+
+# Define origins list for CORS (Cross-Origin Resource Sharing)
 origins = [
-    "http://192.168.1.62:3000",
-    "http://192.168.1.33:3000",
-    "http://localhost:3000"
+    os.getenv('CLIENT_URL'),
 ]
+
 
 app = FastAPI()
 
+# Add CORS (Cross-Origin Resource Sharing) middleware to the FastAPI app
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,  # Allow requests from CLIENT_URL
+    # Allow credentials (cookies, authorization headers)
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all HTTP headers
 )
+
+# Define a route for handling GET requests to "/tokens"
 
 
 @app.get("/tokens")
 def tokens(text: str):
+    """
+    A route to tokenize text.
+
+    Parameters:
+    - text (str): The text to tokenize.
+
+    Returns:
+    - dict: A dictionary containing tokenized output.
+    """
     return tokenize(text)
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, port=3001, host='0.0.0.0')
+    # Run the FastAPI app using Uvicorn server
+    uvicorn.run(
+        app,
+        # Get port number from environment variables
+        port=int(os.getenv('PORT')),
+        host=os.getenv('HOST')  # Get host address from environment variables
+    )

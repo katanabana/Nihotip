@@ -9,19 +9,22 @@
   --root-background-color: #19191e;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 html,
 body,
-#root {
+#root, .app-container {
   height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
   margin: 0;
   padding: 0;
   border: 0;
   overflow: hidden;
   background-color: var(--root-background-color);
-}
-
-* {
-  box-sizing: border-box;
 }
 
 body {
@@ -85,7 +88,6 @@ nav {
 
 .history-container {
   padding-top: 1em;
-  margin-bottom: 1em;
 }
 
 .history-container::after,
@@ -130,6 +132,7 @@ nav:has(.settings.hidden ~ .mode.hidden) {
 
   .history {
     max-height: calc(100vh - 11em);
+    max-height: calc(100dvh - 11em);
   }
 
   #root {
@@ -154,10 +157,12 @@ nav:has(.settings.hidden ~ .mode.hidden) {
 
   .text {
     max-height: calc(100vh - 19em);
+    max-height: calc(100dvh - 19em);
   }
 
   .menu.hidden ~ .text-container .text {
     max-height: calc(100vh - 5em);
+    max-height: calc(100dvh - 5em);
   }
 
   .menu.hidden {
@@ -659,4 +664,14 @@ nav:has(.settings.hidden ~ .mode.hidden) {
 
 .tooltip.hidden {
   opacity: 0;
+}
+
+body,
+#root {
+  transition: 0.3s;
+}
+
+#root:has(.app-container.keyboard-open),
+body:has(.app-container.keyboard-open) {
+  max-height: 50vh;
 }

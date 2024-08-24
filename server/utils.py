@@ -3,7 +3,6 @@ import os
 
 from wanakana import to_katakana
 from sudachipy import Dictionary
-from g4f.client import Client
 
 
 WORD_PROPERTIES = {
@@ -91,22 +90,4 @@ TOKENIZER_MAX_TEXT_SIZE = 49149
 # max possible size of a character in bytes in utf-8:
 TOKENIZER_CHARACTER_SIZE = 4
 # max length of a string that tokenizer can process:
-TOKENIZER_MAX_TEXT_LENGTH = TOKENIZER_MAX_TEXT_SIZE // TOKENIZER_CHARACTER_SIZE
-
-
-# GPT:
-
-def get_gpt_answer(question):
-    client = Client()
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": question}]
-    )
-    return response.choices[0].message.content
-
-
-GPT_MAX_QUERY_LENGTH = 100000
-
-# OTHER:
-
-BATCH_LENGTH = min(TOKENIZER_MAX_TEXT_LENGTH, GPT_MAX_QUERY_LENGTH)
+BATCH_LENGTH = TOKENIZER_MAX_TEXT_SIZE // TOKENIZER_CHARACTER_SIZE
