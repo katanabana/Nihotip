@@ -57,7 +57,7 @@ function App() {
     <div className="display">
       {/* Display tokens as Unit components */}
       {Array.from(tokens.entries(), ([i, token]) => {
-        return <Unit key={i} token={token} color={color} zIndex={1000}></Unit>;
+        return <Unit key={i} token={token} color={color} zIndex={1000} unitId={[i]}></Unit>;
       })}
     </div>
   );

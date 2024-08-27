@@ -9,17 +9,12 @@ import os  # for environment variables
 load_dotenv()
 
 # Define origins list for CORS (Cross-Origin Resource Sharing)
-origins = [
-    os.getenv('CLIENT_URL'),
-]
-
-
 app = FastAPI()
 
 # Add CORS (Cross-Origin Resource Sharing) middleware to the FastAPI app
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Allow requests from CLIENT_URL
+    allow_origins=['*'],  # Allow requests from any origin
     # Allow credentials (cookies, authorization headers)
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods

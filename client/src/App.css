@@ -27,6 +27,12 @@ body,
   background-color: var(--root-background-color);
 }
 
+.app-container {
+  display: flex;
+  justify-content: center;
+  padding: 1em;
+}
+
 body {
   display: flex;
   justify-content: center;
@@ -35,7 +41,6 @@ body {
 #root {
   color: #c8c8be;
   font-family: sans-serif;
-  padding: 1em;
   display: flex;
   justify-content: center;
 }
@@ -135,7 +140,7 @@ nav:has(.settings.hidden ~ .mode.hidden) {
     max-height: calc(100dvh - 11em);
   }
 
-  #root {
+  #root, .app-container {
     flex-direction: column;
   }
 
@@ -626,8 +631,12 @@ nav:has(.settings.hidden ~ .mode.hidden) {
   width: 6em;
 }
 
+.tooltip.shown, .tooltip {
+  opacity: 100%;
+}
+
 .tooltip.shown,
-.tooltip.hidden {
+.tooltip.hidden, .tooltip {
   transition: 0;
   transition: opacity 0.5s;
 }

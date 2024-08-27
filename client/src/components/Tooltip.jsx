@@ -37,10 +37,8 @@ function getTooltipPosition(tooltipRef, targetRef) {
 }
 
 // Tooltip component definition
-const Tooltip = ({ targetRef, target, content, zIndex }) => {
+const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
   const [visible, setVisible] = useState(false);
-  const [pinned, setPinned] = useState(false); // State to track if tooltip is pinned (not hidden on mouse leave)
-  const [hovered, setHovered] = useState(false); // State to track if mouse is currently hovering over the tooltip
   const [position, setPosition] = useState({ top: 0, left: 0 }); // State for tooltip position
   const tooltipRef = useRef(null);
 
@@ -53,38 +51,85 @@ const Tooltip = ({ targetRef, target, content, zIndex }) => {
 
   // Function to show tooltip
   const showTooltip = () => {
+    document.getElementById(
+      `tooltip-${unitId.join("-")}`
+    ).style.zIndex = `${zIndex}`;
+    for (const element of document.getElementsByClassName("tooltip shown")) {
+      if (!`tooltip-${unitId.join("-")}`.startsWith(element.id)) {
+        element.classList.remove("shown");
+        element.classList.add("hidden");
+        document
+          .getElementById(
+            "unit-text-" + element.id.split("-").slice(1).join("-")
+          )
+          .classList.remove("highlight");
+        setTimeout(() => {
+          element.style.zIndex = "-1";
+        }, 500);
+      }
+    }
     updatePosition();
     setVisible(true);
     targetRef.current.classList.add("highlight"); // Add highlight class to target element
     window.addEventListener("resize", updatePosition); // Update tooltip position on window resize
+    let tooltipId = "tooltip";
+    let z = 1;
+    for (const i of unitId) {
+      tooltipId += `-${i}`;
+      const classes = document.getElementById(tooltipId).classList;
+      classes.remove("hidden");
+      classes.add("shown");
+      document.getElementById(tooltipId).style.zIndex = z;
+      z += 1;
+    }
   };
 
   // Function to hide tooltip
-  const hideTooltip = () => {
+  const hideTooltip = (withAncestors) => {
     setVisible(false);
     targetRef.current.classList.remove("highlight"); // Remove highlight class from target element
     window.removeEventListener("resize", updatePosition); // Remove resize event listener
+    if (withAncestors) {
+
+      let tooltipId = "tooltip";
+      for (const i of unitId) {
+        tooltipId += `-${i}`;
+        const classes = document.getElementById(tooltipId).classList;
+        setTimeout(() => {
+          document.getElementById(tooltipId).style.zIndex = -1;
+        }, 500);
+        classes.remove("shown");
+        classes.add("hidden");
+      }
+    }
   };
 
   // Clone the child component and attach event handlers
   const clonedChild = React.cloneElement(target, {
     ref: targetRef,
-    onMouseEnter: () => showTooltip(),
-    onMouseLeave: () => {
-      if (!pinned && !hovered) {
-        hideTooltip();
-      }
+    onMouseEnter: () => {
+      showTooltip();
     },
-    onClick: () => {
-      setPinned(!pinned);
-      if (!pinned) {
-        showTooltip();
-      } else {
-        hideTooltip();
-      }
+    onMouseLeave: () => {
+      setTimeout(() => {
+        if (
+          !document
+            .getElementById(`tooltip-${unitId.join("-")}`)
+            .classList.contains("hovered")
+        ) {
+          hideTooltip(false);
+        }
+      }, 100);
     },
   });
 
+  const tooltipStyle = {
+    top: position.top,
+    left: position.left,
+  };
+  if (visible) {
+    tooltipStyle["zIndex"] = zIndex;
+  }
   // Render tooltip using ReactDOM portal
   return (
     <>
@@ -93,34 +138,22 @@ const Tooltip = ({ targetRef, target, content, zIndex }) => {
       {ReactDOM.createPortal(
         <div
           ref={tooltipRef}
+          id={`tooltip-${unitId.join("-")}`}
           className={"tooltip background" + (visible ? " shown" : " hidden")} // Show or hide tooltip based on visibility state
-          style={{
-            top: position.top,
-            left: position.left,
-            zIndex: visible ? zIndex : -1, // Set zIndex to control visibility stack order
-          }}
+          style={tooltipStyle}
           onMouseEnter={() => {
-            if (visible) {
-              setHovered(true); // Set hovered state to true when mouse enters tooltip
-              showTooltip();
-            }
+            document
+              .getElementById(`tooltip-${unitId.join("-")}`)
+              .classList.add("hovered");
+            showTooltip();
           }}
           onMouseLeave={() => {
-            setHovered(false); // Set hovered state to false when mouse leaves tooltip
-            if (pinned ? true : false) {
-              showTooltip();
-            } else {
-              hideTooltip();
-            }
+            document
+              .getElementById(`tooltip-${unitId.join("-")}`)
+              .classList.remove("hovered");
+            hideTooltip(true);
           }}
-          onClick={() => {
-            setPinned(!pinned); // Toggle pinned state on click
-            if (!pinned || hovered) {
-              showTooltip();
-            } else {
-              hideTooltip();
-            }
-          }}
+          onClick={showTooltip}
         >
           {content} {/* Content to display inside the tooltip */}
         </div>,
