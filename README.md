@@ -64,19 +64,19 @@ To run the application locally, follow these steps:
 
    Create `.env` files in the respective directories with the following content:
 
-   - **Client (React):**
+   - **client/.env**
 
      Create a file named `client/.env` and add:
      ```plaintext
-     REACT_APP_BACKEND_URL=http://192.168.1.62:3001
+     REACT_APP_BACKEND_URL=http://localhost:3001
      ```
 
-   - **Server (Python):**
+   - **server/.env**
 
      Create a file named `server/.env` and add:
      ```plaintext
      PORT=3001
-     HOST=0.0.0.0
+     HOST=localhost
      FRONTEND_URL=http://localhost:3000
      ```
 
