@@ -4,7 +4,6 @@ import os
 from wanakana import to_katakana
 from sudachipy import Dictionary
 
-
 WORD_PROPERTIES = {
     'part of speech': {
         '動詞': 'verb',
@@ -61,7 +60,6 @@ KANA_MAPPING = [
     ('がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ', 'かきくけこさしすせそたちつてとはひふへほはひふへほ')
 ]
 KANA_MAPPING.append(tuple(map(to_katakana, KANA_MAPPING[-1])))
-
 
 # LOAD DICTIONARIES:
 

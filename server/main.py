@@ -5,7 +5,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os  # for environment variables
 
-
 load_dotenv()
 
 # Define origins list for CORS (Cross-Origin Resource Sharing)
@@ -14,12 +13,13 @@ app = FastAPI()
 # Add CORS (Cross-Origin Resource Sharing) middleware to the FastAPI app
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],  # Allow requests from any origin
+    allow_origins=[os.getenv('FRONTEND_URL')],
     # Allow credentials (cookies, authorization headers)
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods
     allow_headers=["*"],  # Allow all HTTP headers
 )
+
 
 # Define a route for handling GET requests to "/tokens"
 
