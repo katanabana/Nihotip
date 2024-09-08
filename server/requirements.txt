@@ -1,0 +1,5 @@
+fastapi==0.114.0
+python-dotenv==1.0.1
+SudachiPy==0.6.8
+uvicorn==0.30.6
+wanakana_python==1.2.2
