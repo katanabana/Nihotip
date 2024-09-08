@@ -5,6 +5,8 @@ and interactive interface. With a React frontend and a Python backend, Nihotip p
 Japanese text and delve into detailed information about words, symbols, and their respective properties via tooltips.
 Nihotip offers a robust solution for analyzing Japanese text at multiple levels of granularity.
 
+![Demo](demo.gif)
+
 ## ✨ Features
 
 - **Japanese Text Tokenization:**
@@ -54,22 +56,47 @@ Nihotip offers a robust solution for analyzing Japanese text at multiple levels 
 
 To run the application locally, follow these steps:
 
+To run the application locally, follow these steps:
+
 1. Clone the repository and navigate into the project directory.
-2. Open two terminal windows and run the following commands in separate terminals:
 
-```bash
-# Start the frontend (React)
-cd client
-npm start
-```
+2. **Set up Environmental Variables:**
 
-```bash
-# Start the backend (Python)
-cd server
-python main.py
-```
+   Create `.env` files in the respective directories with the following content:
 
-3. Open your browser and visit `http://localhost:3000` to start interacting with Nihotip.
+   - **client/.env**
+
+     Create a file named `client/.env` and add:
+     ```plaintext
+     REACT_APP_BACKEND_URL=http://localhost:3001
+     ```
+
+   - **server/.env**
+
+     Create a file named `server/.env` and add:
+     ```plaintext
+     PORT=3001
+     HOST=localhost
+     FRONTEND_URL=http://localhost:3000
+     ```
+
+3. Open two terminal windows and run the following commands in separate terminals:
+
+   ```bash
+   # Start the frontend (React)
+   cd client
+   npm install
+   npm start
+   ```
+
+   ```bash
+   # Start the backend (Python)
+   cd server
+   pip install -r requirements.txt
+   python main.py
+   ```
+
+4. Open your browser and visit `http://localhost:3000` to start interacting with Nihotip.
 
 ## 🚀 Upcoming Features
 

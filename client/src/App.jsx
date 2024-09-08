@@ -11,7 +11,7 @@ import settingsIcon from "./assets/icons/settings.png";
 
 // Asynchronous function to fetch tokens from API
 async function getTokens(text) {
-  let url = process.env.REACT_APP_API_URL; // Using environment variable for API URL
+  let url = process.env.REACT_APP_BACKEND_URL; // Using environment variable for API URL
   url += "/tokens?text=";
   url += text.replaceAll("\n", "%0A"); // Replace newline characters with URL encoding
   const response = await fetch(url, { mode: "cors" }); // Fetching data from API
@@ -41,6 +41,22 @@ function App() {
       addText(text); // Add text to history
     });
   }, [text]); // Dependency on text changes
+
+  useEffect(() => {
+    const wakeUpServer = async () => {
+      try {
+        const response = await fetch(process.env.REACT_APP_BACKEND_URL, {
+          mode: "cors",
+        });
+        const data = await response.json();
+        console.log(data.message);
+      } catch (error) {
+        console.error("Failed to contact the server", error);
+      }
+    };
+
+    wakeUpServer();
+  }, []);
 
   // JSX for text component based on editing mode
   const textComponent = beingEdited ? (
