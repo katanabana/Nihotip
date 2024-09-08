@@ -85,12 +85,14 @@ To run the application locally, follow these steps:
    ```bash
    # Start the frontend (React)
    cd client
+   npm install
    npm start
    ```
 
    ```bash
    # Start the backend (Python)
    cd server
+   pip install -r requirements.txt
    python main.py
    ```
 
