@@ -56,22 +56,45 @@ Nihotip offers a robust solution for analyzing Japanese text at multiple levels 
 
 To run the application locally, follow these steps:
 
+To run the application locally, follow these steps:
+
 1. Clone the repository and navigate into the project directory.
-2. Open two terminal windows and run the following commands in separate terminals:
 
-```bash
-# Start the frontend (React)
-cd client
-npm start
-```
+2. **Set up Environmental Variables:**
 
-```bash
-# Start the backend (Python)
-cd server
-python main.py
-```
+   Create `.env` files in the respective directories with the following content:
 
-3. Open your browser and visit `http://localhost:3000` to start interacting with Nihotip.
+   - **Client (React):**
+
+     Create a file named `client/.env` and add:
+     ```plaintext
+     REACT_APP_BACKEND_URL=http://192.168.1.62:3001
+     ```
+
+   - **Server (Python):**
+
+     Create a file named `server/.env` and add:
+     ```plaintext
+     PORT=3001
+     HOST=0.0.0.0
+     FRONTEND_URL=http://localhost:3000
+     ```
+
+3. Open two terminal windows and run the following commands in separate terminals:
+
+   ```bash
+   # Start the frontend (React)
+   cd client
+   npm start
+   ```
+
+   ```bash
+   # Start the backend (Python)
+   cd server
+   python main.py
+   ```
+
+4. Open your browser and visit `http://localhost:3000` to start interacting with Nihotip.
 
 ## 🚀 Upcoming Features
 
