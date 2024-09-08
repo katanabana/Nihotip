@@ -42,6 +42,22 @@ function App() {
     });
   }, [text]); // Dependency on text changes
 
+  useEffect(() => {
+    const wakeUpServer = async () => {
+      try {
+        const response = await fetch(process.env.REACT_APP_BACKEND_URL, {
+          mode: "cors",
+        });
+        const data = await response.json();
+        console.log(data.message);
+      } catch (error) {
+        console.error("Failed to contact the server", error);
+      }
+    };
+
+    wakeUpServer();
+  }, []);
+
   // JSX for text component based on editing mode
   const textComponent = beingEdited ? (
     <div
