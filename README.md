@@ -1,6 +1,7 @@
 # Nihotip
 
 ![Demo](demo.gif)
+
 Nihotip is a web application designed to help users explore the intricacies of the Japanese language through a dynamic
 and interactive interface. With a React frontend and a Python backend, Nihotip provides a convenient way to tokenize
 Japanese text and delve into detailed information about words, symbols, and their respective properties via tooltips.
