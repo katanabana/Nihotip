@@ -21,7 +21,9 @@ app.add_middleware(
 )
 
 
-# Define a route for handling GET requests to "/tokens"
+@app.get("/")
+async def root():
+    return {"message": "connected to backend successfully"}
 
 
 @app.get("/tokens")
