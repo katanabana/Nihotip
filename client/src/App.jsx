@@ -11,7 +11,7 @@ import settingsIcon from "./assets/icons/settings.png";
 
 // Asynchronous function to fetch tokens from API
 async function getTokens(text) {
-  let url = process.env.REACT_APP_API_URL; // Using environment variable for API URL
+  let url = process.env.REACT_APP_BACKEND_URL; // Using environment variable for API URL
   url += "/tokens?text=";
   url += text.replaceAll("\n", "%0A"); // Replace newline characters with URL encoding
   const response = await fetch(url, { mode: "cors" }); // Fetching data from API
