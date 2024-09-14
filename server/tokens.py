@@ -1,5 +1,14 @@
 # Import necessary functions from wanakana for Japanese text processing
-from wanakana import to_hiragana, to_romaji, is_kana, is_kanji, is_katakana, is_hiragana, is_japanese
+from wanakana import (
+    to_hiragana,
+    to_romaji,
+    is_kana,
+    is_kanji,
+    is_katakana,
+    is_hiragana,
+    is_japanese,
+)
+
 # Import necessary functions and classes from sudachipy for morphological analysis
 from sudachipy import SplitMode, Morpheme
 
@@ -17,10 +26,10 @@ def combine_levels(token_dict: dict):
     Returns:
     - None
     """
-    subtokens = token_dict.get('subtokens')
+    subtokens = token_dict.get("subtokens")
     if subtokens is None or len(subtokens) > 1:
         return
-    token_dict.pop('subtokens')
+    token_dict.pop("subtokens")
     token_dict.update(subtokens[0])
     combine_levels(token_dict)
 
@@ -37,9 +46,9 @@ def token(text, subtokens: list = False, **features) -> dict:
     Returns:
     - dict: A dictionary representing the token.
     """
-    data = {'text': text}
+    data = {"text": text}
     if subtokens:
-        data['subtokens'] = subtokens
+        data["subtokens"] = subtokens
     for key, value in features.items():
         if value is not None:
             data[key] = value
@@ -63,11 +72,11 @@ def get_character(character, previous=None):
     for is_system in [is_katakana, is_hiragana][::step]:
         if is_system(character):
             system = is_system
-            features['romaji'] = to_romaji(character)
+            features["romaji"] = to_romaji(character)
             break
     else:
         system = is_kanji
-    features['writing system'] = system.__name__[3:]
+    features["writing system"] = system.__name__[3:]
     return token(character, **features)
 
 
@@ -87,7 +96,7 @@ def get_characters(string):
         for modified_kana, initial_kana in KANA_MAPPING:
             index = modified_kana.find(symbol)
             if index != -1:
-                character['initial'] = get_character(initial_kana[index])
+                character["initial"] = get_character(initial_kana[index])
                 break
         characters.append(character)
     return characters
@@ -106,13 +115,12 @@ def append_digraph_or_single(subtokens, kana_string, i):
     - list: The updated list of subtokens.
     """
     kwargs = {}
-    if kana_string[i:i + 2] in DICTIONARY['digraphs']:
-        subtoken_text = kana_string[i:i + 2]
-        kwargs['note'] = 'digraph'
+    if kana_string[i : i + 2] in DICTIONARY["digraphs"]:
+        subtoken_text = kana_string[i : i + 2]
+        kwargs["note"] = "digraph"
     else:
         subtoken_text = kana_string[i]
-    subtokens.append(
-        token(subtoken_text, get_characters(subtoken_text), **kwargs))
+    subtokens.append(token(subtoken_text, get_characters(subtoken_text), **kwargs))
     return subtokens
 
 
@@ -149,38 +157,37 @@ def get_syllables(kana_string):
     while i < total_length:
 
         subtokens = append_digraph_or_single([], kana_string, i)
-        text = subtokens[-1]['text']
+        text = subtokens[-1]["text"]
         i += len(text)
 
-        if text in 'っッ' and i < total_length:
-            subtokens[-1].pop('romaji')
-            subtokens[-1]['note'] = 'doubles the consonant after'
+        if text in "っッ" and i < total_length:
+            subtokens[-1].pop("romaji")
+            subtokens[-1]["note"] = "doubles the consonant after"
             append_digraph_or_single(subtokens, kana_string, i)
-            text += subtokens[-1]['text']
+            text += subtokens[-1]["text"]
             i += len(text)
 
-        if kana_string[i:i + 1] == 'ー':
-            note = 'prolongs the vowel before'
-            subtokens.append(token('ー', get_characters('ー'), note=note))
-            subtokens[-1].pop('romaji')
+        if kana_string[i : i + 1] == "ー":
+            note = "prolongs the vowel before"
+            subtokens.append(token("ー", get_characters("ー"), note=note))
+            subtokens[-1].pop("romaji")
             i += 1
-            text += 'ー'
+            text += "ー"
 
         if is_japanese(text):
             romaji = to_romaji(text)
             # wanakana.to_romaji:
             # 1) converts ー to - => - should be replaced with the preceding sound
-            romaji = romaji.replace('-', romaji[-2:-1])
+            romaji = romaji.replace("-", romaji[-2:-1])
             # 2) doesn't modify romaji of ん and ン depending on the sound after => it should be changed manually
-            if text in ['ん', 'ン']:
+            if text in ["ん", "ン"]:
                 if i < total_length - 1:
                     next_sound = to_romaji(kana_string[i])[0]
-                    if next_sound in 'bpm':
-                        romaji = 'm'
-                    elif next_sound in 'kg':
-                        romaji = 'ng'
-                romaji = token(
-                    romaji, note='pronunciation depends on the sound after')
+                    if next_sound in "bpm":
+                        romaji = "m"
+                    elif next_sound in "kg":
+                        romaji = "ng"
+                romaji = token(romaji, note="pronunciation depends on the sound after")
 
             syllables.append(token(text, subtokens, romaji=romaji))
         else:
@@ -222,9 +229,11 @@ def get_unambiguous_parts(surface, reading):
             if is_kana(character) and reading_middle[1:-1].count(character) == 1:
                 reading_i = reading_middle[1:-1].find(character)
                 start = get_unambiguous_parts(
-                    surface_middle[:surface_i + 1], reading_middle[:reading_i + 1])
+                    surface_middle[: surface_i + 1], reading_middle[: reading_i + 1]
+                )
                 end = get_unambiguous_parts(
-                    surface_middle[surface_i + 2:], reading_middle[reading_i + 2:])
+                    surface_middle[surface_i + 2 :], reading_middle[reading_i + 2 :]
+                )
 
                 parts.extend(start)
                 if is_kana(start[-1][0]):
@@ -270,7 +279,7 @@ def get_parts(morpheme: Morpheme):
 
     # Check for furigana parts in JmFurigana dictionary
     key = morpheme.surface(), morpheme.reading_form()
-    jmdict_parts = DICTIONARY['furigana'].get(str(key))
+    jmdict_parts = DICTIONARY["furigana"].get(str(key))
 
     # Use JmFurigana parts if they are more detailed
     if jmdict_parts and len(jmdict_parts) > len(parts):
@@ -302,11 +311,11 @@ def get_word(morpheme):
     """
     features = set()
     for feature in morpheme.part_of_speech():
-        feature = feature.split('-')[0]
+        feature = feature.split("-")[0]
         # Extract subtype from feature if present
-        for subtype, translation in WORD_PROPERTIES['subtype'].items():
+        for subtype, translation in WORD_PROPERTIES["subtype"].items():
             if feature.endswith(subtype):
-                feature = feature[len(subtype):]
+                feature = feature[len(subtype) :]
                 features.add(subtype)
         features.add(feature)
 
@@ -319,14 +328,14 @@ def get_word(morpheme):
                 properties[name] = translation
 
     subtokens = get_parts(morpheme)
-    part_of_speech = 'particle'
-    if properties.get('part of speech') == part_of_speech:
+    part_of_speech = "particle"
+    if properties.get("part of speech") == part_of_speech:
         # Adjust romaji for certain particles
-        for kana, correct_romaji in [('は', 'wa'), ('を', 'o')]:
+        for kana, correct_romaji in [("は", "wa"), ("を", "o")]:
             if morpheme.surface() == kana:
-                initial_romaji = subtokens[0]['romaji']
+                initial_romaji = subtokens[0]["romaji"]
                 note = f'{kana} pronounced as "{correct_romaji}" when a {part_of_speech}, otherwise as "{initial_romaji}"'
-                subtokens[0]['romaji'] = token(correct_romaji, note=note)
+                subtokens[0]["romaji"] = token(correct_romaji, note=note)
 
     return token(morpheme.surface(), subtokens, **properties)
 
@@ -343,11 +352,11 @@ def handle_final_ng(tokens):
     """
     if tokens:
         last_token = tokens[-1]
-        if isinstance(last_token, dict) and last_token['text'][-1] in ['ん', 'ン']:
-            while 'romaji' not in last_token:
-                last_token = last_token['subtokens'][-1]
+        if isinstance(last_token, dict) and last_token["text"][-1] in ["ん", "ン"]:
+            while "romaji" not in last_token:
+                last_token = last_token["subtokens"][-1]
             note = '"ん" and "ン" are pronounced differently (have "ng" romaji) at the end of a phrase'
-            last_token['romaji'] = token('ng', note=note)
+            last_token["romaji"] = token("ng", note=note)
 
 
 def tokenize(text, padding=5):
@@ -369,10 +378,12 @@ def tokenize(text, padding=5):
         words = []
 
         # Process text in batches
-        batch = text[batch_start:batch_start + BATCH_LENGTH]
+        batch = text[batch_start : batch_start + BATCH_LENGTH]
         morphemes = list(TOKENIZER.tokenize(batch))
         batch_start += BATCH_LENGTH
-        if batch_start < text_length:  # Apply padding only if it's not the end of the text
+        if (
+            batch_start < text_length
+        ):  # Apply padding only if it's not the end of the text
             for morpheme in morphemes[-padding:]:
                 batch_start -= len(morpheme.surface())
             morphemes = morphemes[:-padding]
@@ -383,7 +394,7 @@ def tokenize(text, padding=5):
                 if is_kana(character) or is_kanji(character):
                     word = get_word(morpheme)
                     tokens.append(word)
-                    if 'part of speech' in word:
+                    if "part of speech" in word:
                         words.append(word)
                     break
             else:

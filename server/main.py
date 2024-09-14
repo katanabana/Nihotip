@@ -13,7 +13,7 @@ app = FastAPI()
 # Add CORS (Cross-Origin Resource Sharing) middleware to the FastAPI app
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.getenv('FRONTEND_URL')],
+    allow_origins=[os.getenv("FRONTEND_URL")],
     # Allow credentials (cookies, authorization headers)
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods
@@ -40,11 +40,11 @@ def tokens(text: str):
     return tokenize(text)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Run the FastAPI app using Uvicorn server
     uvicorn.run(
         app,
         # Get port number from environment variables
-        port=int(os.getenv('PORT')),
-        host=os.getenv('HOST')  # Get host address from environment variables
+        port=int(os.getenv("PORT")),
+        host=os.getenv("HOST"),  # Get host address from environment variables
     )
