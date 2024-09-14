@@ -82,7 +82,8 @@ function Unit({ token, color, zIndex, unitId }) {
   // Conditionally add association image to tooltip based on token attributes
   if (
     ["katakana", "hiragana"].includes(token["writing system"]) &&
-    !token.initial && token.text != 'ー'
+    !token.initial &&
+    token.text !== "ー"
   )
     tooltip.push(
       <img key="img" src={associations[token.text]} alt={token.text} />

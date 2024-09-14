@@ -3,7 +3,7 @@ import process from "process"; // Node.js process module imported (typically for
 import { Unit } from "./components/Unit.jsx"; // Importing custom components
 import Menu from "./components/Menu.jsx";
 import { addText, History } from "./components/History.jsx";
-import useKeyboardStatus from './components/useKeyboardStatus.jsx'; // Import the custom hook
+import useKeyboardStatus from "./components/useKeyboardStatus.jsx"; // Import the custom hook
 import editIcon from "./assets/icons/edit.png"; // Importing icons
 import displayIcon from "./assets/icons/display.png";
 import loaderIcon from "./assets/icons/loader.png";
@@ -40,7 +40,7 @@ function App() {
       setLoading(false); // Set loading state false
       addText(text); // Add text to history
     });
-  }, [text]); // Dependency on text changes
+  }, [text, beingEdited]); // Dependency on text changes
 
   useEffect(() => {
     const wakeUpServer = async () => {
@@ -73,7 +73,15 @@ function App() {
     <div className="display">
       {/* Display tokens as Unit components */}
       {Array.from(tokens.entries(), ([i, token]) => {
-        return <Unit key={i} token={token} color={color} zIndex={1000} unitId={[i]}></Unit>;
+        return (
+          <Unit
+            key={i}
+            token={token}
+            color={color}
+            zIndex={1000}
+            unitId={[i]}
+          ></Unit>
+        );
       })}
     </div>
   );
@@ -101,6 +109,7 @@ function App() {
     >
       <img
         className="button"
+        alt="change mode"
         src={beingEdited ? displayIcon : editIcon} // Display icon based on editing mode
         onClick={changeMode} // Click handler to change mode
       ></img>
@@ -122,7 +131,7 @@ function App() {
 
   // Main JSX return for App component
   return (
-    <div className={`app-container ${isKeyboardOpen ? 'keyboard-open' : ''}`}>
+    <div className={`app-container ${isKeyboardOpen ? "keyboard-open" : ""}`}>
       <div id="tooltips"></div>
       <Menu
         color={color}
@@ -136,12 +145,14 @@ function App() {
         <div className={"background text" + (loading ? " blur" : "")}>
           {textComponent} {/* Display text component */}
           <img
+            alt="loading"
             className={"loader hiddable" + (loading ? "" : " hidden")}
             src={loaderIcon} // Loader icon
           ></img>
         </div>
         <nav>
           <img
+            alt="settings"
             className={
               "settings button hiddable" +
               (beingEdited || loading ? " hidden" : "")
@@ -158,7 +169,7 @@ function App() {
           document.getElementsByClassName("input")[0].innerHTML = text;
           setCurrentText(text);
         }}
-        hidden={currentText || history.length === 0} // History visibility
+        hidden={currentText} // History visibility
       ></History>
     </div>
   );

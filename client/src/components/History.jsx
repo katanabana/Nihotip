@@ -50,6 +50,7 @@ function HistoryItem({ setText, data, removed, index }) {
       <div className="history-item-bottom">
         <span className="history-date">{date}</span>
         <img
+          alt=""
           className="button"
           onClick={
             removed
