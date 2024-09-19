@@ -85,7 +85,6 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
   };
 
   // Function to hide tooltip
-  // Function to hide tooltip
   const hideTooltip = (withAncestors) => {
     setVisible(false);
     targetRef.current.classList.remove("highlight"); // Remove highlight class from target element
@@ -95,6 +94,7 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
       for (const i of unitId) {
         // Declare a new block-scoped variable for each iteration
         let currentTooltipId = tooltipId + `-${i}`;
+        tooltipId = currentTooltipId;
         const classes = document.getElementById(currentTooltipId).classList;
         setTimeout(() => {
           document.getElementById(currentTooltipId).style.zIndex = -1;
