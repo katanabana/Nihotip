@@ -85,18 +85,19 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
   };
 
   // Function to hide tooltip
+  // Function to hide tooltip
   const hideTooltip = (withAncestors) => {
     setVisible(false);
     targetRef.current.classList.remove("highlight"); // Remove highlight class from target element
     window.removeEventListener("resize", updatePosition); // Remove resize event listener
     if (withAncestors) {
-
       let tooltipId = "tooltip";
       for (const i of unitId) {
-        tooltipId += `-${i}`;
-        const classes = document.getElementById(tooltipId).classList;
+        // Declare a new block-scoped variable for each iteration
+        let currentTooltipId = tooltipId + `-${i}`;
+        const classes = document.getElementById(currentTooltipId).classList;
         setTimeout(() => {
-          document.getElementById(tooltipId).style.zIndex = -1;
+          document.getElementById(currentTooltipId).style.zIndex = -1;
         }, 500);
         classes.remove("shown");
         classes.add("hidden");
