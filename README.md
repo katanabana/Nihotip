@@ -7,6 +7,8 @@ Nihotip offers a robust solution for analyzing Japanese text at multiple levels 
 
 ![Demo](demo.gif)
 
+URL of the published version: https://nihotip.netlify.app
+
 ## ✨ Features
 
 - **Japanese Text Tokenization:**
