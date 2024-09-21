@@ -120,7 +120,7 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
         ) {
           hideTooltip(false);
         }
-      }, 100);
+      }, 500);
     },
   });
 
