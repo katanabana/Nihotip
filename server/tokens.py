@@ -115,12 +115,13 @@ def append_digraph_or_single(subtokens, kana_string, i):
     - list: The updated list of subtokens.
     """
     kwargs = {}
-    if kana_string[i : i + 2] in DICTIONARY["digraphs"]:
-        subtoken_text = kana_string[i : i + 2]
+    if kana_string[i: i + 2] in DICTIONARY["digraphs"] or kana_string[i: i + 3] in DICTIONARY["digraphs"]:
+        subtoken_text = kana_string[i: i + 2]
         kwargs["note"] = "digraph"
     else:
         subtoken_text = kana_string[i]
-    subtokens.append(token(subtoken_text, get_characters(subtoken_text), **kwargs))
+    subtokens.append(
+        token(subtoken_text, get_characters(subtoken_text), **kwargs))
     return subtokens
 
 
@@ -167,7 +168,7 @@ def get_syllables(kana_string):
             text += subtokens[-1]["text"]
             i += len(text)
 
-        if kana_string[i : i + 1] == "ー":
+        if kana_string[i: i + 1] == "ー":
             note = "prolongs the vowel before"
             subtokens.append(token("ー", get_characters("ー"), note=note))
             subtokens[-1].pop("romaji")
@@ -187,7 +188,8 @@ def get_syllables(kana_string):
                         romaji = "m"
                     elif next_sound in "kg":
                         romaji = "ng"
-                romaji = token(romaji, note="pronunciation depends on the sound after")
+                romaji = token(
+                    romaji, note="pronunciation depends on the sound after")
 
             syllables.append(token(text, subtokens, romaji=romaji))
         else:
@@ -229,10 +231,12 @@ def get_unambiguous_parts(surface, reading):
             if is_kana(character) and reading_middle[1:-1].count(character) == 1:
                 reading_i = reading_middle[1:-1].find(character)
                 start = get_unambiguous_parts(
-                    surface_middle[: surface_i + 1], reading_middle[: reading_i + 1]
+                    surface_middle[: surface_i +
+                                     1], reading_middle[: reading_i + 1]
                 )
                 end = get_unambiguous_parts(
-                    surface_middle[surface_i + 2 :], reading_middle[reading_i + 2 :]
+                    surface_middle[surface_i +
+                                   2:], reading_middle[reading_i + 2:]
                 )
 
                 parts.extend(start)
@@ -278,12 +282,22 @@ def get_parts(morpheme: Morpheme):
         parts.extend(subparts)
 
     # Check for furigana parts in JmFurigana dictionary
-    key = morpheme.surface(), morpheme.reading_form()
-    jmdict_parts = DICTIONARY["furigana"].get(str(key))
+    reading_to_parts = DICTIONARY["furigana"].get(morpheme.surface())
 
     # Use JmFurigana parts if they are more detailed
-    if jmdict_parts and len(jmdict_parts) > len(parts):
-        parts = jmdict_parts
+    if reading_to_parts:
+        jmdict_parts = reading_to_parts.get(morpheme.reading_form())
+        if jmdict_parts and len(jmdict_parts) > len(parts):
+            parts = []
+            surface_prev = 0
+            reading_prev = 0
+            indexes = [jmdict_parts[i:i + 2] for i in range(0, len(jmdict_parts), 2)]
+            for surface_index, reading_index in indexes:
+                part_reading = morpheme.reading_form()[reading_prev:reading_index]
+                part_surface = morpheme.surface()[surface_prev:surface_index]
+                parts.append([part_surface, part_reading])
+                surface_prev = surface_index
+                reading_prev = reading_index
 
     tokens = []
     for text, reading in parts:
@@ -315,7 +329,7 @@ def get_word(morpheme):
         # Extract subtype from feature if present
         for subtype, translation in WORD_PROPERTIES["subtype"].items():
             if feature.endswith(subtype):
-                feature = feature[len(subtype) :]
+                feature = feature[len(subtype):]
                 features.add(subtype)
         features.add(feature)
 
@@ -378,11 +392,11 @@ def tokenize(text, padding=5):
         words = []
 
         # Process text in batches
-        batch = text[batch_start : batch_start + BATCH_LENGTH]
+        batch = text[batch_start: batch_start + BATCH_LENGTH]
         morphemes = list(TOKENIZER.tokenize(batch))
         batch_start += BATCH_LENGTH
         if (
-            batch_start < text_length
+                batch_start < text_length
         ):  # Apply padding only if it's not the end of the text
             for morpheme in morphemes[-padding:]:
                 batch_start -= len(morpheme.surface())

@@ -70,20 +70,10 @@ KANA_MAPPING.append(tuple(map(to_katakana, KANA_MAPPING[-1])))
 
 DICTIONARY = {}
 DIRECTORY = "dictionaries"
-previous_directory = os.curdir
-os.chdir(os.path.dirname(__file__))
-for subdirectory in os.listdir(DIRECTORY):
-    for filename in os.listdir(os.path.join(DIRECTORY, subdirectory)):
-        path = os.path.join(DIRECTORY, subdirectory, filename)
-        with open(path, encoding="utf-8-sig") as file:
-            data = json.load(file)
-            methods = {list: "extend", dict: "update"}
-            method = methods[type(data)]
-            if subdirectory not in DICTIONARY:
-                DICTIONARY[subdirectory] = type(data)()
-            add = getattr(DICTIONARY[subdirectory], method)
-            add(data)
-os.chdir(previous_directory)
+for json_file in os.listdir(DIRECTORY):
+    path = os.path.join(DIRECTORY, json_file)
+    with open(path, encoding="utf-8-sig") as file:
+        DICTIONARY[json_file.split('.')[0]] = json.load(file)
 
 # CREATE TOKENIZER:
 

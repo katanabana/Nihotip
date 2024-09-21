@@ -3,7 +3,8 @@ import uvicorn  # server
 from tokens import tokenize
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-import os  # for environment variables
+import psutil
+import os
 
 load_dotenv()
 
@@ -27,7 +28,7 @@ async def root():
 
 
 @app.get("/tokens")
-def tokens(text: str):
+def tokens(text: str) -> list:
     """
     A route to tokenize text.
 
@@ -35,13 +36,16 @@ def tokens(text: str):
     - text (str): The text to tokenize.
 
     Returns:
-    - dict: A dictionary containing tokenized output.
+    - list: A list containing tokenized output.
     """
     return tokenize(text)
 
 
 if __name__ == "__main__":
-    # Run the FastAPI app using Uvicorn server
+    process = psutil.Process(os.getpid())
+    memory_usage = process.memory_info().rss
+    print(f"Current memory usage: {memory_usage / 1024 / 1024:.2f} MB")
+
     uvicorn.run(
         app,
         # Get port number from environment variables
