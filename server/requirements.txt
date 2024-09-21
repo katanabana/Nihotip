@@ -4,3 +4,4 @@ SudachiPy==0.6.8
 uvicorn==0.30.6
 wanakana_python==1.2.2
 SudachiDict-core==20240109
+psutil==5.9.6
