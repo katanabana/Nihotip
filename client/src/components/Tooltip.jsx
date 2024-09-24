@@ -52,7 +52,7 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
   const handleTransitionEnd = (event) => {
     if (event.propertyName === "opacity") {
       // Ensure that the zIndex is set to -1 after the transition ends
-      event.target.style.zIndex = "-1";
+      event.target.style.zIndex = -1000;
       event.target.removeEventListener("transitionend", handleTransitionEnd);
     }
   };

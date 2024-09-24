@@ -15,7 +15,8 @@
 
 html,
 body,
-#root, .app-container {
+#root,
+.app-container {
   height: 100vh;
   height: 100dvh;
   max-height: 100vh;
@@ -25,6 +26,11 @@ body,
   border: 0;
   overflow: hidden;
   background-color: var(--root-background-color);
+}
+
+* {
+  max-height: 100vh;
+  max-height: 100dvh;
 }
 
 .app-container {
@@ -140,7 +146,8 @@ nav:has(.settings.hidden ~ .mode.hidden) {
     max-height: calc(100dvh - 11em);
   }
 
-  #root, .app-container {
+  #root,
+  .app-container {
     flex-direction: column;
   }
 
@@ -435,6 +442,10 @@ nav:has(.settings.hidden ~ .mode.hidden) {
   font-weight: 600;
 }
 
+.menu {
+  z-index: 1000;
+}
+
 .hiragana {
   color: #ff9696;
 }
@@ -631,12 +642,14 @@ nav:has(.settings.hidden ~ .mode.hidden) {
   width: 6em;
 }
 
-.tooltip.shown, .tooltip {
+.tooltip.shown,
+.tooltip {
   opacity: 100%;
 }
 
 .tooltip.shown,
-.tooltip.hidden, .tooltip {
+.tooltip.hidden,
+.tooltip {
   transition: 0;
   transition: opacity 0.5s;
 }
@@ -678,9 +691,4 @@ nav:has(.settings.hidden ~ .mode.hidden) {
 body,
 #root {
   transition: 0.3s;
-}
-
-#root:has(.app-container.keyboard-open),
-body:has(.app-container.keyboard-open) {
-  max-height: 50vh;
 }
