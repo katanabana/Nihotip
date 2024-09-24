@@ -49,23 +49,31 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
     }
   };
 
+  const handleTransitionEnd = (event) => {
+    if (event.propertyName === "opacity") {
+      // Ensure that the zIndex is set to -1 after the transition ends
+      event.target.style.zIndex = "-1";
+      event.target.removeEventListener("transitionend", handleTransitionEnd);
+    }
+  };
   // Function to show tooltip
   const showTooltip = () => {
     document.getElementById(
       `tooltip-${unitId.join("-")}`
     ).style.zIndex = `${zIndex}`;
     for (const element of document.getElementsByClassName("tooltip shown")) {
-      if (!`tooltip-${unitId.join("-")}`.startsWith(element.id)) {
+      if (
+        !`tooltip-${unitId.join("-")}`.startsWith(element.id) &&
+        !element.id.startsWith(`tooltip-${unitId.join("-")}`)
+      ) {
+        element.addEventListener("transitionend", handleTransitionEnd);
         element.classList.remove("shown");
         element.classList.add("hidden");
+        element.classList.remove("pinned");
+        element.classList.remove("hovered");
         document
-          .getElementById(
-            "unit-text-" + element.id.split("-").slice(1).join("-")
-          )
+          .getElementById(element.id.replace("tooltip", "unit-text"))
           .classList.remove("highlight");
-        setTimeout(() => {
-          element.style.zIndex = "-1";
-        }, 500);
       }
     }
     updatePosition();
@@ -73,7 +81,7 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
     targetRef.current.classList.add("highlight"); // Add highlight class to target element
     window.addEventListener("resize", updatePosition); // Update tooltip position on window resize
     let tooltipId = "tooltip";
-    let z = 1;
+    let z = 1000;
     for (const i of unitId) {
       tooltipId += `-${i}`;
       const classes = document.getElementById(tooltipId).classList;
@@ -84,23 +92,32 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
     }
   };
 
-  // Function to hide tooltip
+  // Function to hide tooltip with optional ancestor hiding
   const hideTooltip = (withAncestors) => {
     setVisible(false);
     targetRef.current.classList.remove("highlight"); // Remove highlight class from target element
     window.removeEventListener("resize", updatePosition); // Remove resize event listener
+
     if (withAncestors) {
-      let tooltipId = "tooltip";
-      for (const i of unitId) {
-        // Declare a new block-scoped variable for each iteration
-        let currentTooltipId = tooltipId + `-${i}`;
-        tooltipId = currentTooltipId;
-        const classes = document.getElementById(currentTooltipId).classList;
-        setTimeout(() => {
-          document.getElementById(currentTooltipId).style.zIndex = -1;
-        }, 500);
-        classes.remove("shown");
-        classes.add("hidden");
+      for (let i = unitId.length; i > 0; i--) {
+        let currentTooltipId = "tooltip-" + unitId.slice(0, i).join("-");
+        let currentTooltip = document.getElementById(currentTooltipId);
+
+        if (!currentTooltip.matches(":hover")) {
+          const classes = currentTooltip.classList;
+          currentTooltip.addEventListener("transitionend", handleTransitionEnd);
+          classes.remove("shown");
+          classes.add("hidden");
+          classes.remove("pinned");
+          classes.remove("hovered");
+          document
+            .getElementById(currentTooltipId.replace("tooltip", "unit-text"))
+            .classList.remove("highlight");
+
+          // Add the transition event listener
+        } else {
+          break;
+        }
       }
     }
   };
@@ -112,15 +129,12 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
       showTooltip();
     },
     onMouseLeave: () => {
-      setTimeout(() => {
-        if (
-          !document
-            .getElementById(`tooltip-${unitId.join("-")}`)
-            .classList.contains("hovered")
-        ) {
-          hideTooltip(false);
-        }
-      }, 500);
+      const classes = document.getElementById(
+        `tooltip-${unitId.join("-")}`
+      ).classList;
+      if (!classes.contains("hovered") && !classes.contains("pinned")) {
+        hideTooltip(false);
+      }
     },
   });
 
@@ -128,9 +142,6 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
     top: position.top,
     left: position.left,
   };
-  if (visible) {
-    tooltipStyle["zIndex"] = zIndex;
-  }
   // Render tooltip using ReactDOM portal
   return (
     <>
@@ -142,6 +153,7 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
           id={`tooltip-${unitId.join("-")}`}
           className={"tooltip background" + (visible ? " shown" : " hidden")} // Show or hide tooltip based on visibility state
           style={tooltipStyle}
+          tabIndex={0}
           onMouseEnter={() => {
             document
               .getElementById(`tooltip-${unitId.join("-")}`)
@@ -152,9 +164,29 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
             document
               .getElementById(`tooltip-${unitId.join("-")}`)
               .classList.remove("hovered");
+            if (
+              !document
+                .getElementById(`tooltip-${unitId.join("-")}`)
+                .classList.contains("pinned")
+            ) {
+              hideTooltip(true);
+            }
+          }}
+          onClick={() => {
+            document
+              .getElementById(`tooltip-${unitId.join("-")}`)
+              .classList.add("pinned");
+            showTooltip();
+          }}
+          onBlur={() => {
+            const classes = document.getElementById(
+              `tooltip-${unitId.join("-")}`
+            ).classList;
+            classes.remove("pinned");
+            classes.remove("hovered");
+
             hideTooltip(true);
           }}
-          onClick={showTooltip}
         >
           {content} {/* Content to display inside the tooltip */}
         </div>,
