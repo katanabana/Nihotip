@@ -79,7 +79,6 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
     updatePosition();
     setVisible(true);
     targetRef.current.classList.add("highlight"); // Add highlight class to target element
-    window.addEventListener("resize", updatePosition); // Update tooltip position on window resize
     let tooltipId = "tooltip";
     let z = 1000;
     for (const i of unitId) {
@@ -96,7 +95,6 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
   const hideTooltip = (withAncestors) => {
     setVisible(false);
     targetRef.current.classList.remove("highlight"); // Remove highlight class from target element
-    window.removeEventListener("resize", updatePosition); // Remove resize event listener
 
     if (withAncestors) {
       for (let i = unitId.length; i > 0; i--) {
