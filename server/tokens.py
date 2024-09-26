@@ -301,15 +301,21 @@ def get_parts(morpheme: Morpheme):
 
     tokens = []
     for text, reading in parts:
-        if not is_katakana(text):
-            reading = to_hiragana(reading)
-        subtokens = get_syllables(reading)
-        if reading == text:
-            tokens.extend(subtokens)
+        if any(map(is_kanji, text)):
+            if not is_katakana(text): # if not all characters are katakana characters
+                reading = to_hiragana(reading)
+            subtokens = get_syllables(reading)
+            if reading == text:
+                tokens.extend(subtokens)
+            else:
+                characters = get_characters(text)
+                part = token(text, subtokens=characters, reading=subtokens)
+                tokens.append(part)
         else:
             characters = get_characters(text)
-            part = token(text, subtokens=characters, reading=subtokens)
+            part = token(text, subtokens=characters)
             tokens.append(part)
+
     return tokens
 
 
