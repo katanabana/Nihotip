@@ -50,10 +50,9 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
   };
 
   const handleTransitionEnd = (event) => {
-    if (event.propertyName === "opacity") {
-      // Ensure that the zIndex is set to -1 after the transition ends
+    if (event.propertyName === "opacity" && !visible) {
+      // update zIndex after the transition ends
       event.target.style.zIndex = -1000;
-      event.target.removeEventListener("transitionend", handleTransitionEnd);
     }
   };
   // Function to show tooltip
@@ -103,7 +102,6 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
 
         if (!currentTooltip.matches(":hover")) {
           const classes = currentTooltip.classList;
-          currentTooltip.addEventListener("transitionend", handleTransitionEnd);
           classes.remove("shown");
           classes.add("hidden");
           classes.remove("pinned");
@@ -152,6 +150,7 @@ const Tooltip = ({ targetRef, target, content, zIndex, unitId }) => {
           className={"tooltip background" + (visible ? " shown" : " hidden")} // Show or hide tooltip based on visibility state
           style={tooltipStyle}
           tabIndex={0}
+          onTransitionEnd={handleTransitionEnd}
           onMouseEnter={() => {
             document
               .getElementById(`tooltip-${unitId.join("-")}`)
